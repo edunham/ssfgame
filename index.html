@@ -48,7 +48,11 @@ setInterval(function() {
 
   for (p in people){
     console.log(people[p])
-    var m = L.marker(people[p]['times'][now], L.divIcon(people[p]['face']));
+var popup = L.popup()
+    .setLatLng(people[p]['times'][now])
+    .setContent(people[p]['face'])
+    .openOn(map);
+
     }
 }, 2000);
 
