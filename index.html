@@ -1,0 +1,60 @@
+<head>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+ <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+</head>
+
+<body>
+    <div id="clock"></div>
+
+    <div id="map"  style="height: 50%;"></div>
+<script>
+var map = L.map('map').setView([51.505, -0.09], 13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+function Person(name) {
+this.name = name;
+this.face =  "😐";
+// const pin = L.marker(latLng, L.divIcon({ html: emojiImg }));
+// var marker = L.marker([51.5, -0.09]).addTo(map);
+this.times = [[51.5, -0.09], [51.509, -0.08], [51.51, -0.047], [51.508, -0.11]];
+this.caution = 50;
+this.wallet = 0;
+}
+
+
+var clocks =['🕛🕧🕐🕜🕑🕝🕒🕞🕓🕟🕔🕠🕕🕡🕖🕢🕗🕣🕘🕤🕙🕥🕚🕦'];
+var times = ['🌅', '🏙️', '🌇','🌃' ];
+
+var days = 0
+var now = 0
+people = [new Person("bob")]
+setInterval(function() {
+  now += 1;
+  if ( now > 3){ 
+    now = 0;
+    days += 1;
+    }
+  time = times[now];
+  document.getElementById("clock")
+                .innerHTML = "day " + days + " " + time;
+
+  for (p in people){
+    console.log(people[p])
+    var m = L.marker(people[p]['times'][now], L.divIcon(people[p]['face']));
+    }
+}, 2000);
+
+
+</script>
+
+<a href="https://leafletjs.com/examples/quick-start/">leaflet docs</a>
+
+</body>
