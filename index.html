@@ -14,17 +14,34 @@
     <div id="map"  style="height: 50%;"></div>
 <script>
 var map = L.map('map').setView([51.505, -0.09], 13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+
+
+
+function Business(name){
+this.name = name;
+this.face = "💼";
+this.employees = [];
+this.location = [51.509, -0.08];
+}
+
+faces = ["🧑‍🦰", "👱", "🧑‍🦳", "🧑‍🦱"];
+
+function r(i){
+    // add a little randomness to an integer but not too much
+  return  i + Math.floor(Math.random() * .001) - Math.floor(Math.random() * .001);
+}
+
+function pickone(items){
+    //get a random one of several things
+    return items[Math.floor(Math.random()*items.length)];
+}
 
 function Person(name) {
 this.name = name;
-this.face =  "😐";
+this.face =  pickone(faces);
 // const pin = L.marker(latLng, L.divIcon({ html: emojiImg }));
 // var marker = L.marker([51.5, -0.09]).addTo(map);
-this.times = [[51.5, -0.09], [51.509, -0.08], [51.51, -0.047], [51.508, -0.11]];
+this.times = [[r(51.5), r(-0.09)], [r(51.509), r(-0.08)], [r(51.51), r(-0.047)], [r(51.508), r(-0.11)]];
 this.caution = 50;
 this.wallet = 0;
 }
@@ -35,7 +52,33 @@ var times = ['🌅', '🏙️', '🌇','🌃' ];
 
 var days = 0
 var now = 0
-people = [new Person("bob")]
+people = [new Person("Bob"), new Person("Alex"), new Person("Jess")]
+
+//setup layers when this script first runs
+layers = {}
+for (p in people){
+layers[people[p]['name']] = L.marker(people[p]['times'][0]).bindPopup(people[p]['face']);
+}
+var personlayers = L.layerGroup(layers);
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+});
+
+
+var baseMaps = {
+    "The World": osm,
+};
+
+var overlayMaps = {
+    "People": personlayers
+};
+console.log(personlayers);
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+
+
+//timer and all that happens on it
 setInterval(function() {
   now += 1;
   if ( now > 3){ 
@@ -47,12 +90,18 @@ setInterval(function() {
                 .innerHTML = "day " + days + " " + time;
 
   for (p in people){
-    console.log(people[p])
-var popup = L.popup()
+    console.log(people[p]);
+    /*
+    L.popup()
     .setLatLng(people[p]['times'][now])
     .setContent(people[p]['face'])
     .openOn(map);
+    */
 
+    /*
+    var marker = new L.marker(people[p]['times'][now], { opacity: 0.1 }); //opacity may be set to zero
+marker.bindTooltip(people[p]['face'], {permanent: false, className: "my-label", offset: [0, 0] });
+marker.addTo(map);*/
     }
 }, 2000);
 
