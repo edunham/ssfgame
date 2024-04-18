@@ -105,10 +105,10 @@
     </div>
     <div class="wrapper">
         <div>Tools
-            <div id="current-tool">no tool selected</div>
+            <div id="current-tool">Select a tool then click to use it</div>
             <div class="wrapper" id="tools">
-                <div><button id='research'>🔎</button></div>
-                <div><button id='phish'>🎣</button></div>
+                <div><button id='research'>🔎Research</button></div>
+                <div><button id='phish'>🎣Phish</button></div>
             </div>
         </div>
         <div>Places
@@ -187,14 +187,14 @@
                 people[p]['wallet'] -= price;
                 businesses[to]['coffers'] += price;
             }
+            people[p]['caution'] += .01 * businesses[to]['caution']
             if (ssf) {
                 if (businesses[to]['caution'] > 0.5) {
                     loseAccount(p);
                     loseBiz(to);
-
                 }
-
             }
+            
         }
 
 
@@ -287,9 +287,9 @@
                 var empty = document.createElement("button");
                 var escalate = document.createElement("button");
                 empty.id = "empty" + i;
-                empty.textContent = "💸";
+                empty.textContent = "💸 Take money";
                 escalate.id = "escalate" + i;
-                escalate.textContent = "🔑👥";
+                escalate.textContent = "🔑👥 Escalate";
                 empty.addEventListener('click', function (e) {
                     //clicked to take their money
                     take = businesses[a]['coffers'];
@@ -324,9 +324,9 @@
                 const biz = people[a]['routine'][now];
 
                 empty.id = "empty" + i;
-                empty.textContent = "💸";
+                empty.textContent = "💸Take money";
                 escalate.id = "empty" + biz.charCodeAt(0);
-                escalate.textContent = biz;
+                escalate.textContent = biz + "Escalate";
                 empty.addEventListener('click', function (e) {
                     //clicked to take their money
                     take = people[a]['wallet'];
@@ -423,8 +423,6 @@
 
         })
 
-
-
         //timer and all that happens on it
         setInterval(function () {
             now += 1;
@@ -440,15 +438,25 @@
                         people[p]['caution'] = .99;
                     }
                     //payday once per day
-                    people[p]['wallet'] += people[p]['salary']
+                    people[p]['wallet'] += people[p]['salary'];
                     //also drop their suspicion a bit, function of where they're located
-                    people[p]['caution'] -= 0.05 * people[p]['caution']
+                    people[p]['caution'] -= 0.05 * people[p]['caution'];
                     //rotate passwords
                     if (people[p]['caution'] > 0.85) {
                         loseAccount(p);
-                        happen(people[p]['face'] + "💻🔒 ****** ")
+                        happen(people[p]['face'] + "💻🔒 ****** ");
 
                     }
+                }
+                for (b in businesses) {
+                    if (businesses[b]['caution'] > 1){
+                        businesses[b]['caution'] = 1;
+                    }
+                    if (businesses[b]['caution'] > 0.85) {
+                        loseBiz(b);
+                        happen(businesses[b]['face'] + "💻🔒 ****** ");
+                    }
+
                 }
             }
             time = schedule[now];
