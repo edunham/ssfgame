@@ -17,7 +17,7 @@
             padding: .3em;
             border-radius: 3px;
             flex: 1;
-            flex-direction: row;
+            flex-direction: column;
         }
 
         .wrapper .wrapper>div {
@@ -48,8 +48,9 @@
     </div>
     <div class="wrapper">
         <div class="wrapper" id="accounts">Accounts</div>
-        <div class="wrapper" id="events">Events</div>
-        
+        <div class="wrapper">Events <div id="events"></div>
+        </div>
+
     </div>
 
 
@@ -106,10 +107,11 @@ _ __ ___   _____   _____
 
         var schedule = ['🌅', '🏙️', '🌇', '🌃'];
 
-        var days = 0
-        var now = 0
-        people = []
-        businesses = {}
+        var days = 0;
+        var now = 0;
+        people = [];
+        businesses = {};
+        action = "";
 
         // initial people setup, places display/setup,and places display
         for (let step = 0; step < 15; step++) {
@@ -132,23 +134,16 @@ _ __ ___   _____   _____
             parent.appendChild(child)
         };
 
-        // phishing tool
-        document.getElementById('phish').addEventListener('click', function () {
-            console.log("you clicked the phisher");
-            document.getElementById("current-tool")
-                .innerHTML = "Phishing...";
 
-            for (p in people) {
-                //it does go through the add loop on 14 distinct p...
-                console.log("adding event listener for " + p + people[p]['face']);
-                //TODO FIXME this is adding the same event listener for everyone???
-                //and everyone's event listener shows p=14 
-                document.getElementById(people[p]['face']).addEventListener('click', function (e) {
-                    //tried to phish them
-                    //TODO how do i freeze the values from when the event listener was added
-                    //maybe by making thefunction not anonymous? resume at https://stackoverflow.com/questions/50816162/addeventlistener-with-named-function-and-parameters
-                    console.log(e + " you tried to phish " + people[p]['face']);
-                    var roll = Math.random()
+        /**
+         * ALL PEOPLE RESPONSES TO GETTING CLICKED GO HERE
+         */
+        for (let p of Object.keys(people)) {
+            // this "let p of Object.keys" thing came from Claude when we had a chat about js internals
+            console.log("adding event listener for " + p + people[p]['face']);
+            document.getElementById(people[p]['face']).addEventListener('click', function (e) {
+                var roll = Math.random();
+                if (action == "phish") {
                     if (roll > people[p]['caution']) {
                         //successfully phished -- CHANGE THIS to add account to the compromised section
                         console.log("phishing successful!");
@@ -168,8 +163,36 @@ _ __ ___   _____   _____
                         document.getElementById("wallet")
                             .innerHTML = "$" + cash;
                     }
-                })
-            }
+                }
+                if (action == "research") {
+                    const events = document.getElementById("events");
+                    var child = document.createElement("div");
+                    child.id = days + schedule[now].charCodeAt(0) + people[p]['face'].charCodeAt(0); // unique-enough event...
+                    const stamp = "day " + days + ": "
+                    if (roll > people[p]['caution']) {
+                        child.textContent = stamp + "Researched " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔎:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine'];
+                    }
+                    else {
+                        child.textContent = stamp + people[p]['face'] + " is careful of their privacy online!";
+                    }
+
+                    if (events.firstChild) {
+                        //thank you claude for firstchild logic
+                        events.insertBefore(child, events.firstChild);
+                    } else {
+                        events.appendChild(child);
+                    }
+
+                }
+            })
+        }
+
+        // phishing tool
+        document.getElementById('phish').addEventListener('click', function () {
+            console.log("you clicked the phisher");
+            document.getElementById("current-tool")
+                .innerHTML = "Phishing...";
+            action = "phish"
         })
 
         //researching tool
@@ -177,23 +200,8 @@ _ __ ___   _____   _____
             console.log("you clicked the researcher");
             document.getElementById("current-tool")
                 .innerHTML = "Researching...";
+            action = "research"
 
-            for (p in people) {
-                document.getElementById(people[p]['face']).addEventListener('click', function () {
-                    //tried to phish them
-                    console.log("you tried to research " + people[p]['face']);
-                    if (Math.random() > people[p]['caution']) {
-                        //successfully researched them
-                        console.log("researching successful!");
-                        const whom = document.getElementById(people[p]['face']);
-                        //tooltip stuff is busted, make research do something else instead... show routine? 
-                        // whom.innerHTML = people[p]['face'] + "<span class='tooltip'>Day " + days + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 📅: " + people[p]['routine'] + "</span>";
-
-                        //whom.addEventListener("mouseover", showTooltip);
-                        //whom.addEventListener("mouseout", hideTooltip);
-                    }
-                })
-            }
         })
 
 
@@ -218,12 +226,13 @@ _ __ ___   _____   _____
                 .innerHTML = "day " + days + " " + time;
             document.getElementById("wallet")
                 .innerHTML = "$" + cash;
-//this is where UL goes, wipe accounts from list
+            //this is where UL goes, wipe accounts from list
             for (p in people) {
                 //console.log(people[p]);
                 move(people[p], people[p]['routine'][now]);
 
             }
+            console.log(people)
 
             //todo: here, go thru all businesses and if their suspicion is too high they hold a security training
             // if their suspicion is low maybe they get some money from taking out a loan or something
