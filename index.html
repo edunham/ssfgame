@@ -36,8 +36,8 @@
         <div>Tools
             <div id="current-tool">no tool selected</div>
             <div class="wrapper" id="tools">
-                <div><button id='research'>Research</button></div>
-                <div><button id='phish'>Phish</button></div>
+                <div><button id='research'>🔎</button></div>
+                <div><button id='phish'>🎣</button></div>
                 <div>3</div>
             </div>
         </div>
@@ -49,8 +49,9 @@
     <div class="wrapper">
         <div class="wrapper">
             Accounts<div>
-            <div id="bizacct"></div>
-            <div id="accounts"></div></div>
+                <div id="bizacct"></div>
+                <div id="accounts"></div>
+            </div>
         </div>
         <div class="wrapper">
             Events
@@ -78,7 +79,7 @@
 
         function Business(icon) {
             this.face = icon;
-            this.coffers = 0;
+            this.coffers = pickone(starters) * 10;
             this.caution = 0.25;
             this.cost = pickone(prices);
         }
@@ -136,10 +137,32 @@
         for (p in places) {
             var parent = document.getElementById("places");
             var child = document.createElement("div");
+            var nest = document.createElement("div");
             child.id = places[p];
-            child.textContent = places[p];
+            nest.textContent = places[p];
+            child.appendChild(nest);
             parent.appendChild(child);
             businesses[places[p]] = new Business(places[p]);
+            b = places[p]
+            nest.addEventListener('click', function (e) {
+                console.log("you clicked a business" + b)
+                var roll = Math.random();
+                if (action == "phish") {
+                    if (roll < businesses[b]['caution']) {
+                        businesses[b]['caution'] += .01
+                        happen(b + "📞📛")
+                    }
+                }
+                document.getElementById("wallet")
+                    .innerHTML = "$" + cash;
+
+                if (action == "research") {
+                    console.log(businesses[b])
+                    happen("🔎 " + b + ": 💰$" + businesses[b]['coffers'] + ", 🔒:" + (Math.floor(businesses[b]['caution'] * 100)) + ", 🎟️: " + businesses[b]['cost']);
+                }
+            })
+        
+
         }
 
         for (p in people) {
@@ -220,6 +243,8 @@
             }
 
         }
+
+
         /**
          * ALL PEOPLE RESPONSES TO GETTING CLICKED GO HERE
          */
@@ -231,8 +256,7 @@
                 if (action == "phish") {
                     if (roll > people[p]['caution']) {
                         //successful phish
-                        happen("phished" + people[p]['face'])
-                        console.log("unshifting " + p)
+                        happen("🎣" + people[p]['face'])
                         compromised.unshift(p)
                         updateAccounts()
                         businesses[people[p]['routine'][now]]['caution'] += .25 * people[p]['salary']
@@ -242,7 +266,7 @@
                     else {
                         //person gets more cautious when a phish fails
                         people[p]['caution'] += 0.1 * roll;
-                        happen(people[p]['face'] + "was too cautious to phish!")
+                        happen(people[p]['face'] + "🚫🎣")
                         //business they're in gets a teensy bit (.01) more cautious when it fails too?
 
                         //also update the wallet
@@ -254,7 +278,7 @@
                 if (action == "research") {
 
                     if (roll > people[p]['caution']) {
-                        happen("Researched " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔎:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine']);
+                        happen("🔎 " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔒:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine']);
                     }
                     else {
                         happen(people[p]['face'] + " is careful of their privacy online!");
