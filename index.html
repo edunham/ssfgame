@@ -49,7 +49,7 @@
     <div class="wrapper">
         <div class="wrapper">
             Accounts<div>
-                <div id="bizacct"></div>
+                <div id="bizaccts"></div>
                 <div id="accounts"></div>
             </div>
         </div>
@@ -115,9 +115,6 @@
                 people[p]['wallet'] -= price;
                 businesses[to]['coffers'] += price;
             }
-            //todo: move some $$ from the wallet of 'who' into the coffers of 'to', here
-            //todo: and if they can't afford this business's cost, they sub in a random different business for this time in their routine
-
         }
 
 
@@ -145,7 +142,6 @@
             businesses[places[p]] = new Business(places[p]);
             b = places[p]
             nest.addEventListener('click', function (e) {
-                console.log("you clicked a business" + b)
                 var roll = Math.random();
                 if (action == "phish") {
                     if (roll < businesses[b]['caution']) {
@@ -157,11 +153,10 @@
                     .innerHTML = "$" + cash;
 
                 if (action == "research") {
-                    console.log(businesses[b])
                     happen("🔎 " + b + ": 💰$" + businesses[b]['coffers'] + ", 🔒:" + (Math.floor(businesses[b]['caution'] * 100)) + ", 🎟️: " + businesses[b]['cost']);
                 }
             })
-        
+
 
         }
 
@@ -192,14 +187,54 @@
         function loseAccount(a) {
             compromised.splice(compromised.indexOf(a), 1);
         }
+        function loseBiz(a) {
+            bizcomp.splice(bizcomp.indexOf(a), 1);
+        }
 
         function updateAccounts() {
-            console.log(compromised)
             const accounts = document.getElementById("accounts");
             //remove all children of the accounts div
             accounts.innerHTML = "";
+            const bizaccts = document.getElementById("bizaccts");
+            bizaccts.innerHTML = "";
+            for (let s of Object.keys(bizcomp)) {
+                a = bizcomp[s];
+                //re-add business accounts
+                var child = document.createElement("div");
+                i = a.charCodeAt(0);
+                child.id = i; // unique-enough event...
+                var empty = document.createElement("button");
+                var escalate = document.createElement("button");
+                empty.id = "empty" + i;
+                empty.textContent = "💸";
+                escalate.id = "escalate" + i;
+                escalate.textContent = "🔑👥";
+                empty.addEventListener('click', function (e) {
+                    //clicked to take their money
+                    take = businesses[a]['coffers'];
+                    businesses[a]['coffers'] = 0;
+                    cash += take
+                    happen(a + " 💸 $" + take);
+                    businesses[a]['caution'] = 0.1 * take;
+                    updateAccounts()
+                })
+                escalate.addEventListener('click', function (e) {
+                    //todo: phish all the people in the business at once
+
+                })
+                child.textContent = businesses[a]['face'] + " " + i + ": $" + businesses[a]['coffers'];
+                child.appendChild(empty);
+                // child.appendChild(escalate); //TODO FIXME this is where we escalate
+                if (bizaccts.firstChild) {
+                    //thank you claude for firstchild logic
+                    bizaccts.insertBefore(child, bizaccts.firstChild);
+                } else {
+                    bizaccts.appendChild(child);
+                }
+
+            }
             for (let a of Object.keys(compromised)) {
-                //re-add accounts one by one
+                //re-add personal accounts one by one
                 var child = document.createElement("div");
                 i = people[a]['face'].charCodeAt(0);
                 child.id = i; // unique-enough event...
@@ -218,8 +253,7 @@
                     cash += take
                     happen(people[a]['face'] + " 💸 $" + take);
                     people[a]['caution'] = 0.9;
-                    console.log(biz)
-                    console.log(businesses)
+
                     businesses[biz]['caution'] += people[a]['salary'] / 2;
                     updateAccounts()
                 })
@@ -227,7 +261,12 @@
                     /** 
                      * 
                      * TODO add escalation to compromise a business acct
+                     * we know the biz... 
+                     * roll for it, higher caution of person is good, higher caution of business is bad
+                     * if you succeed, biz account goes into your biz accounts list and displays there
                     */
+                    bizcomp.unshift(biz);
+                    updateAccounts();
 
 
                 })
@@ -250,7 +289,6 @@
          */
         for (let p of Object.keys(people)) {
             // this "let p of Object.keys" thing came from Claude when we had a chat about js internals
-            console.log("adding event listener for " + p + people[p]['face']);
             document.getElementById(people[p]['face']).addEventListener('click', function (e) {
                 var roll = Math.random();
                 if (action == "phish") {
@@ -291,7 +329,6 @@
 
         // phishing tool
         document.getElementById('phish').addEventListener('click', function () {
-            console.log("you clicked the phisher");
             document.getElementById("current-tool")
                 .innerHTML = "Phishing...";
             action = "phish"
@@ -299,7 +336,6 @@
 
         //researching tool
         document.getElementById('research').addEventListener('click', function () {
-            console.log("you clicked the researcher");
             document.getElementById("current-tool")
                 .innerHTML = "Researching...";
             action = "research"
