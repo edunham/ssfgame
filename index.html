@@ -69,7 +69,7 @@
             "🤑", "🤒", "🤓", "🤔", "🤤", "🤕", "🤥", "🤗", "🤠", "🤡", "🤧", "🤣", "🥸", "🤩", "😵‍💫", "🤫", "🤭", "🧐", "🤨", "😮‍💨", "😶‍🌫️"];
 
         const places = ["🏦", "🏨", "🏫", "🏠", "🏛️", "🏬", "🏭", "🏥", "🏣", "🏗️", "🏢", "🏘️"];
-        const prices = [0, 0, .01, .01, .1, .1, 1, 1, 1, 10, 100];
+        const prices = [0, 0, 1, 1, 1, 2, 3, 4, 6, 5, 1, 1, 10, 100];
 
         function pickone(items) {
             //get a random one of several things
@@ -86,7 +86,7 @@
         function Person() {
             this.face = pickone(faces);
             this.routine = [pickone(places), pickone(places), pickone(places), pickone(places)];
-            this.caution = 0.5;
+            this.caution = 0.15;
             this.salary = pickone(starters);
             this.wallet = pickone(starters);
         }
@@ -300,9 +300,8 @@
                     people[p]['caution'] -= 0.05 * people[p]['caution']
                     //rotate passwords
                     if (people[p]['caution'] > 0.85) {
-                        console.log("should lose an account");
                         loseAccount(p);
-                        happen(people[p]['face'] + "changed their passwords")
+                        happen(people[p]['face'] + "💻🔒 ****** ")
 
                     }
                 }
