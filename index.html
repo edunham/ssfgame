@@ -26,16 +26,21 @@
             flex-direction: row;
 
         }
+
+        .tooltip {
+            display: none;
+        }
     </style>
     <div class="wrapper">
 
-        <div id="clock"></div>
+        <div id="clock">day 0</div>
     </div>
     <div class="wrapper">
         <div>Tools
+            <div id="current-tool">no tool selected</div>
             <div class="wrapper" id="tools">
-                <div>1</div>
-                <div>2</div>
+                <div><button id='research'>Research</button></div>
+                <div><button id='phish'>Phish</button></div>
                 <div>3</div>
             </div>
         </div>
@@ -48,6 +53,8 @@
     <div id="clock"></div>
     <!-- -->
     <script>
+        var cash = 0;
+        starters = [5, 10, 15, 20, 25, 30, 35, 40]
         faces = ["👦", "👧", "👨", "👩", "👴", "👵", "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😎", "😇", "😏", "😐", "😉", "😊", "😑", "😒", "😋", "😌", "😓", "😔", "😍", "😕", "😜", "😝", "😖", "😗",
             "😞", "😟", "😘", "😙", "😠", "😡", "😚", "😛", "😢", "😪", "😣", "😤", "😫", "😥", "😬", "😦", "😭", "😧", "😮", "😯", "😩", "😨", "😲", "😳", "😴", "😵", "😶", "😷", "🙁", "🙂", "🙃", "🙄", "🤐",
             "🤑", "🤒", "🤓", "🤔", "🤤", "🤕", "🤥", "🤗", "🤠", "🤡", "🤧", "🤣", "🥸", "🤩", "😵‍💫", "🤫", "🤭", "🧐", "🤨", "😮‍💨", "😶‍🌫️"];
@@ -63,11 +70,12 @@
         function Person() {
             this.face = pickone(faces);
             this.times = [pickone(places), pickone(places), pickone(places), pickone(places)];
-            this.caution = 50;
-            this.wallet = 0;
+            this.caution = 0.5;
+            this.salary = 10;
+            this.wallet = pickone(starters);
         }
-        function move(who, to){
-            const whence = document.getElementById(who);
+        function move(who, to) {
+            const whence = document.getElementById(who['face']);
             whence.remove();
             var where = document.getElementById(to);
             where.appendChild(whence);
@@ -102,6 +110,69 @@
             parent.appendChild(child)
         };
 
+        // phishing tool
+        document.getElementById('phish').addEventListener('click', function () {
+            console.log("you clicked the phisher");
+            document.getElementById("current-tool")
+                .innerHTML = "Phishing...";
+
+            for (p in people) {
+                document.getElementById(people[p]['face']).addEventListener('click', function () {
+                    //tried to phish them
+                    console.log("you tried to phish " + people[p]['face']);
+                    if (Math.random() > people[p]['caution']) {
+                        //successfully phished
+                        console.log("phishing successful!");
+                        if (people[p]['wallet'] > 10) {
+                            console.log("money acquired");
+                            people[p]['wallet'] -= 10;
+                            cash += 10;
+                        }
+                    }
+                })
+            }
+        })
+
+        function showTooltip() {
+            const tooltip = document.querySelector(".tooltip");
+            tooltip.style.display = "block";
+        }
+        function hideTooltip() {
+            const tooltip = document.querySelector(".tooltip");
+            tooltip.style.display = "none";
+        }
+
+
+        //researching tool
+        document.getElementById('research').addEventListener('click', function () {
+            console.log("you clicked the researcher");
+            document.getElementById("current-tool")
+                .innerHTML = "Researching...";
+
+            for (p in people) {
+                document.getElementById(people[p]['face']).addEventListener('click', function () {
+                    //tried to phish them
+                    console.log("you tried to research " + people[p]['face']);
+                    if (Math.random() > people[p]['caution']) {
+                        //successfully researched them
+                        console.log("researching successful!");
+                        const whom = document.getElementById(people[p]['face']);
+                        /*
+                        <div id="myDiv">This is my div <span class="tooltip">This is my tooltip</span></div>
+                        const myDiv = document.getElementById("myDiv");
+                        myDiv.addEventListener("mouseover", showTooltip);
+                        myDiv.addEventListener("mouseout", hideTooltip);                      
+                        */
+                        whom.innerHTML = people[p]['face'] + "<span class='tooltip'>Day " + days + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 📅: " + people[p]['times'] + "</span>";
+
+                        whom.addEventListener("mouseover", showTooltip);
+                        whom.addEventListener("mouseout", hideTooltip);
+                    }
+                })
+            }
+        })
+
+
 
         //timer and all that happens on it
         setInterval(function () {
@@ -109,17 +180,21 @@
             if (now > 3) {
                 now = 0;
                 days += 1;
+                for (p in people) {
+                    people[p]['wallet'] += people[p]['salary']
+
+                }
             }
             time = times[now];
             document.getElementById("clock")
-                .innerHTML = "day " + days + " " + time;
+                .innerHTML = "day " + days + " " + time + "\t$" + cash;
 
             for (p in people) {
-                console.log(people[p]);
-                move(people[p]['face'], people[p]['times'][now]);
+                //console.log(people[p]);
+                move(people[p], people[p]['times'][now]);
 
             }
-        }, 2000);
+        }, 6000);
 
 
     </script>
