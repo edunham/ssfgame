@@ -426,6 +426,11 @@
 
         })
 
+        // take ?tick=2 or whatever to change game speed
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+       const tickValue = urlParams.get('tick') || 3;
+
         //timer and all that happens on it
         setInterval(function () {
             now += 1;
@@ -481,7 +486,7 @@
             // if their suspicion is low maybe they get some money from taking out a loan or something
             //if their suspicion is high maybe they spend some money on security
             // if they hold a security training, the business supsicion goes down, the individual suspicions go up, and people maybe replace the business in their routine
-        }, 6000);
+        }, tickValue * 1000);
 
 
     </script>
