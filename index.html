@@ -124,7 +124,7 @@ _ __ ___   _____   _____
             child.id = places[p];
             child.textContent = places[p];
             parent.appendChild(child);
-            businesses[p] = new Business(places[p]);
+            businesses[places[p]] = new Business(places[p]);
         }
 
         for (p in people) {
@@ -149,8 +149,12 @@ _ __ ___   _____   _____
         }
 
         compromised = [] // these are the p ids for the people so people[p] gets their details
+        function loseAccount(a) {
+            compromised.splice(compromised.indexOf(a), 1);
+        }
 
         function updateAccounts() {
+            console.log(compromised)
             const accounts = document.getElementById("accounts");
             //remove all children of the accounts div
             accounts.innerHTML = "";
@@ -159,7 +163,34 @@ _ __ ___   _____   _____
                 var child = document.createElement("div");
                 i = people[a]['face'].charCodeAt(0);
                 child.id = i; // unique-enough event...
-                child.textContent = people[a]['face'] + " " +  i + ": $" + people[a]['wallet'] + "button, button";
+                var empty = document.createElement("button");
+                var escalate = document.createElement("button");
+                const biz = people[a]['routine'][now];
+
+                empty.id = "empty" + i;
+                empty.textContent = "💸";
+                escalate.id = "empty" + biz.charCodeAt(0);
+                escalate.textContent = biz;
+                empty.addEventListener('click', function (e) {
+                    //clicked to take their money
+                    take = people[a]['wallet'];
+                    people[a]['wallet'] = 0;
+                    cash += take
+                    happen(people[a]['face'] + " had $" + take + " stolen")
+                    people[a]['caution'] = 0.9;
+                    console.log(biz)
+                    console.log(businesses)
+                    businesses[biz]['caution'] += people[a]['salary'] / 2;
+                    updateAccounts()
+                })
+                escalate.addEventListener('click', function (e) {
+
+
+
+                })
+                child.textContent = people[a]['face'] + " " + i + ": $" + people[a]['wallet'];
+                child.appendChild(empty);
+                child.appendChild(escalate);
                 if (accounts.firstChild) {
                     //thank you claude for firstchild logic
                     accounts.insertBefore(child, accounts.firstChild);
@@ -184,7 +215,8 @@ _ __ ___   _____   _____
                         console.log("unshifting " + p)
                         compromised.unshift(p)
                         updateAccounts()
-      
+                        businesses[people[p]['routine'][now]]['caution'] += .25 * people[p]['salary']
+
                         //business they're in gets .1 more cautious when a successful phish happens there
                     }
                     else {
@@ -239,12 +271,20 @@ _ __ ___   _____   _____
                 now = 0;
                 days += 1;
                 for (p in people) {
+                    if (people[p]['caution'] > 1) {
+                        people[p]['caution'] = .99;
+                    }
                     //payday once per day
                     people[p]['wallet'] += people[p]['salary']
                     //also drop their suspicion a bit, function of where they're located
-                    people[p]['caution'] -= .005 * people[p]['caution']
-                    //also change bank passwords if suspicion high enough (over 90?)
-                    //so remove accounts from account list
+                    people[p]['caution'] -= 0.05 * people[p]['caution']
+                    //rotate passwords
+                    if (people[p]['caution'] > 0.85) {
+                        console.log("should lose an account");
+                        loseAccount(p);
+                        happen(people[p]['face'] + "changed their passwords")
+
+                    }
                 }
             }
             time = schedule[now];
@@ -258,7 +298,7 @@ _ __ ___   _____   _____
                 move(people[p], people[p]['routine'][now]);
 
             }
-            console.log(people)
+            updateAccounts()
 
             //todo: here, go thru all businesses and if their suspicion is too high they hold a security training
             // if their suspicion is low maybe they get some money from taking out a loan or something
