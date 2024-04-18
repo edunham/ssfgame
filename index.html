@@ -431,7 +431,7 @@
         // take ?tick=2 or whatever to change game speed
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
-       const tickValue = urlParams.get('tick') || 3;
+        const tickValue = urlParams.get('tick') || 3;
 
         //timer and all that happens on it
         setInterval(function () {
@@ -446,6 +446,9 @@
                 for (p in people) {
                     if (people[p]['caution'] > 1) {
                         people[p]['caution'] = .99;
+                    }
+                    if (people[p]['caution'] <= 0) {
+                        people[p]['caution'] = .01;
                     }
                     //payday once per day
                     at = people[p]['routine'][now];
@@ -465,7 +468,10 @@
                     if (businesses[b]['caution'] > 1) {
                         businesses[b]['caution'] = 1;
                     }
-                    businesses[b]['caution'] -= 0.1;
+                    if (businesses[b]['caution'] <= 0) {
+                        businesses[b]['caution'] = .01;
+                    }
+                    businesses[b]['caution'] -= 0.1 * businesses[b]['caution'];
                     if (businesses[b]['caution'] > 0.85) {
                         loseBiz(b);
                         happen(businesses[b]['face'] + "💻🔒 ****** ");
