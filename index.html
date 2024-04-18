@@ -47,7 +47,8 @@
         </div>
     </div>
     <div class="wrapper">
-        <div class="wrapper" id="accounts">Accounts</div>
+        <div class="wrapper">Accounts<div id="accounts"></div>
+        </div>
         <div class="wrapper">Events <div id="events"></div>
         </div>
 
@@ -133,7 +134,21 @@ _ __ ___   _____   _____
             child.textContent = people[p]['face'];
             parent.appendChild(child)
         };
+        function happen(what) {
+            const events = document.getElementById("events");
+            var child = document.createElement("div");
+            child.id = days + schedule[now].charCodeAt(0) + people[p]['face'].charCodeAt(0); // unique-enough event...
+            const stamp = "day " + days + ": ";
+            child.textContent = stamp + what;
 
+            if (events.firstChild) {
+                //thank you claude for firstchild logic
+                events.insertBefore(child, events.firstChild);
+            } else {
+                events.appendChild(child);
+            }
+
+        }
 
         /**
          * ALL PEOPLE RESPONSES TO GETTING CLICKED GO HERE
@@ -165,23 +180,14 @@ _ __ ___   _____   _____
                     }
                 }
                 if (action == "research") {
-                    const events = document.getElementById("events");
-                    var child = document.createElement("div");
-                    child.id = days + schedule[now].charCodeAt(0) + people[p]['face'].charCodeAt(0); // unique-enough event...
-                    const stamp = "day " + days + ": "
+
                     if (roll > people[p]['caution']) {
-                        child.textContent = stamp + "Researched " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔎:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine'];
+                        happen("Researched " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔎:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine']);
                     }
                     else {
-                        child.textContent = stamp + people[p]['face'] + " is careful of their privacy online!";
+                        happen(people[p]['face'] + " is careful of their privacy online!");
                     }
 
-                    if (events.firstChild) {
-                        //thank you claude for firstchild logic
-                        events.insertBefore(child, events.firstChild);
-                    } else {
-                        events.appendChild(child);
-                    }
 
                 }
             })
