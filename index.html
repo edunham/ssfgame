@@ -192,7 +192,8 @@
             }
             people[p]['caution'] += .01 * businesses[to]['caution']
             if (ssf) {
-                if (businesses[to]['caution'] > 0.5) {
+                if (businesses[to]['caution'] > 0.1) {
+                    console.log("SSF triggered! ")
                     loseAccount(p);
                     loseBiz(to);
                 }
@@ -310,11 +311,17 @@
         bizcomp = [] // these are the business emojis for the businesses so businesses[b] gets info
         function loseAccount(a) {
             compromised.splice(compromised.indexOf(a), 1);
-            people[a]['caution'] = 0.1;
+            people[a]['caution'] = 0.01;
+            if (ssf) {
+                happen(people[a]['face'] + " secured by SSF")
+            }
         }
         function loseBiz(a) {
             businesses[a]['caution'] = 0.1;
             bizcomp.splice(bizcomp.indexOf(a), 1);
+            if (ssf) {
+                happen(a + " secured by SSF")
+            }
         }
 
         function updateAccounts() {
