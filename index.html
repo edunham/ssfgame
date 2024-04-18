@@ -26,11 +26,11 @@
             flex-direction: row;
 
         }
-
     </style>
     <div class="wrapper">
 
         <div id="clock">day 0</div>
+        <div id="wallet">$0</div>
     </div>
     <div class="wrapper">
         <div>Tools
@@ -46,8 +46,13 @@
             </div>
         </div>
     </div>
+    <div class="wrapper">
+        <div class="wrapper" id="accounts">Accounts</div>
+        <div class="wrapper" id="events">Events</div>
+        
+    </div>
 
-    <div id="clock"></div>
+
     <!-- -->
     <script>
         var cash = 0;
@@ -94,7 +99,7 @@ _ __ ___   _____   _____
             where.appendChild(whence);
             //todo: move some $$ from the wallet of 'who' into the coffers of 'to', here
             //todo: and if they can't afford this business's cost, they sub in a random different business for this time in their routine
-            
+
         }
 
 
@@ -134,10 +139,15 @@ _ __ ___   _____   _____
                 .innerHTML = "Phishing...";
 
             for (p in people) {
+                //it does go through the add loop on 14 distinct p...
+                console.log("adding event listener for " + p + people[p]['face']);
                 //TODO FIXME this is adding the same event listener for everyone???
-                document.getElementById(people[p]['face']).addEventListener('click', function () {
+                //and everyone's event listener shows p=14 
+                document.getElementById(people[p]['face']).addEventListener('click', function (e) {
                     //tried to phish them
-                    console.log(p + " you tried to phish " + people[p]['face']);
+                    //TODO how do i freeze the values from when the event listener was added
+                    //maybe by making thefunction not anonymous? resume at https://stackoverflow.com/questions/50816162/addeventlistener-with-named-function-and-parameters
+                    console.log(e + " you tried to phish " + people[p]['face']);
                     var roll = Math.random()
                     if (roll > people[p]['caution']) {
                         //successfully phished -- CHANGE THIS to add account to the compromised section
@@ -153,6 +163,10 @@ _ __ ___   _____   _____
                         //person gets more cautious when a phish fails
                         people[p]['caution'] += 0.1 * roll;
                         //business they're in gets a teensy bit (.01) more cautious when it fails too?
+
+                        //also update the wallet
+                        document.getElementById("wallet")
+                            .innerHTML = "$" + cash;
                     }
                 })
             }
@@ -201,8 +215,10 @@ _ __ ___   _____   _____
             }
             time = schedule[now];
             document.getElementById("clock")
-                .innerHTML = "day " + days + " " + time + "\t$" + cash;
-
+                .innerHTML = "day " + days + " " + time;
+            document.getElementById("wallet")
+                .innerHTML = "$" + cash;
+//this is where UL goes, wipe accounts from list
             for (p in people) {
                 //console.log(people[p]);
                 move(people[p], people[p]['routine'][now]);
