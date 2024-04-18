@@ -140,16 +140,35 @@ _ __ ___   _____   _____
             child.id = days + schedule[now].charCodeAt(0) + people[p]['face'].charCodeAt(0); // unique-enough event...
             const stamp = "day " + days + ": ";
             child.textContent = stamp + what;
-
             if (events.firstChild) {
                 //thank you claude for firstchild logic
                 events.insertBefore(child, events.firstChild);
             } else {
                 events.appendChild(child);
             }
-
         }
 
+        compromised = [] // these are the p ids for the people so people[p] gets their details
+
+        function updateAccounts() {
+            const accounts = document.getElementById("accounts");
+            //remove all children of the accounts div
+            accounts.innerHTML = "";
+            for (let a of Object.keys(compromised)) {
+                //re-add accounts one by one
+                var child = document.createElement("div");
+                i = people[a]['face'].charCodeAt(0);
+                child.id = i; // unique-enough event...
+                child.textContent = people[a]['face'] + " " +  i + ": $" + people[a]['wallet'] + "button, button";
+                if (accounts.firstChild) {
+                    //thank you claude for firstchild logic
+                    accounts.insertBefore(child, accounts.firstChild);
+                } else {
+                    accounts.appendChild(child);
+                }
+            }
+
+        }
         /**
          * ALL PEOPLE RESPONSES TO GETTING CLICKED GO HERE
          */
@@ -160,24 +179,25 @@ _ __ ___   _____   _____
                 var roll = Math.random();
                 if (action == "phish") {
                     if (roll > people[p]['caution']) {
-                        //successfully phished -- CHANGE THIS to add account to the compromised section
-                        console.log("phishing successful!");
-                        if (people[p]['wallet'] > 10) {
-                            console.log("money acquired");
-                            people[p]['wallet'] -= 10;
-                            cash += 10;
-                        }
+                        //successful phish
+                        happen("phished" + people[p]['face'])
+                        console.log("unshifting " + p)
+                        compromised.unshift(p)
+                        updateAccounts()
+      
                         //business they're in gets .1 more cautious when a successful phish happens there
                     }
                     else {
                         //person gets more cautious when a phish fails
                         people[p]['caution'] += 0.1 * roll;
+                        happen(people[p]['face'] + "was too cautious to phish!")
                         //business they're in gets a teensy bit (.01) more cautious when it fails too?
 
                         //also update the wallet
-                        document.getElementById("wallet")
-                            .innerHTML = "$" + cash;
+
                     }
+                    document.getElementById("wallet")
+                        .innerHTML = "$" + cash;
                 }
                 if (action == "research") {
 
