@@ -47,9 +47,14 @@
         </div>
     </div>
     <div class="wrapper">
-        <div class="wrapper">Accounts<div id="accounts"></div>
+        <div class="wrapper">
+            Accounts<div>
+            <div id="bizacct"></div>
+            <div id="accounts"></div></div>
         </div>
-        <div class="wrapper">Events <div id="events"></div>
+        <div class="wrapper">
+            Events
+            <div id="events"> </div>
         </div>
 
     </div>
@@ -86,19 +91,29 @@
             this.wallet = pickone(starters);
         }
 
-        /*
-_ __ ___   _____   _____ 
-| '_ ` _ \ / _ \ \ / / _ \
-| | | | | | (_) \ V /  __/
-|_| |_| |_|\___/ \_/ \___|
-                          
-
-        */
-        function move(who, to) {
-            const whence = document.getElementById(who['face']);
+        /**
+         * 
+         * MOVE-IE MAGIC
+         *         
+         **/
+        function move(p) {
+            who = people[p]['face']
+            to = people[p]['routine'][now]
+            const whence = document.getElementById(who);
             whence.remove();
             var where = document.getElementById(to);
             where.appendChild(whence);
+            price = businesses[to]['cost']
+            if (price > people[p]['wallet']) {
+                //can't afford to go to this place as much
+                elsewhere = pickone(places);
+                people[p]['routine'][now] = elsewhere;
+                happen(who + "💭💵🚫" + to + "💭" + schedule[now] + elsewhere);
+            }
+            else {
+                people[p]['wallet'] -= price;
+                businesses[to]['coffers'] += price;
+            }
             //todo: move some $$ from the wallet of 'who' into the coffers of 'to', here
             //todo: and if they can't afford this business's cost, they sub in a random different business for this time in their routine
 
@@ -134,6 +149,7 @@ _ __ ___   _____   _____
             child.textContent = people[p]['face'];
             parent.appendChild(child)
         };
+
         function happen(what) {
             const events = document.getElementById("events");
             var child = document.createElement("div");
@@ -149,6 +165,7 @@ _ __ ___   _____   _____
         }
 
         compromised = [] // these are the p ids for the people so people[p] gets their details
+        bizcomp = [] // these are the business emojis for the businesses so businesses[b] gets info
         function loseAccount(a) {
             compromised.splice(compromised.indexOf(a), 1);
         }
@@ -176,7 +193,7 @@ _ __ ___   _____   _____
                     take = people[a]['wallet'];
                     people[a]['wallet'] = 0;
                     cash += take
-                    happen(people[a]['face'] + " had $" + take + " stolen")
+                    happen(people[a]['face'] + " 💸 $" + take);
                     people[a]['caution'] = 0.9;
                     console.log(biz)
                     console.log(businesses)
@@ -184,7 +201,10 @@ _ __ ___   _____   _____
                     updateAccounts()
                 })
                 escalate.addEventListener('click', function (e) {
-
+                    /** 
+                     * 
+                     * TODO add escalation to compromise a business acct
+                    */
 
 
                 })
@@ -294,8 +314,7 @@ _ __ ___   _____   _____
                 .innerHTML = "$" + cash;
             //this is where UL goes, wipe accounts from list
             for (p in people) {
-                //console.log(people[p]);
-                move(people[p], people[p]['routine'][now]);
+                move(p);
 
             }
             updateAccounts()
