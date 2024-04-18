@@ -310,6 +310,7 @@
         bizcomp = [] // these are the business emojis for the businesses so businesses[b] gets info
         function loseAccount(a) {
             compromised.splice(compromised.indexOf(a), 1);
+            people[a]['caution'] = 0.1;
         }
         function loseBiz(a) {
             businesses[a]['caution'] = 0.1;
