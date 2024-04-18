@@ -27,9 +27,6 @@
 
         }
 
-        .tooltip {
-            display: none;
-        }
     </style>
     <div class="wrapper">
 
@@ -54,43 +51,62 @@
     <!-- -->
     <script>
         var cash = 0;
-        starters = [5, 10, 15, 20, 25, 30, 35, 40]
-        faces = ["👦", "👧", "👨", "👩", "👴", "👵", "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😎", "😇", "😏", "😐", "😉", "😊", "😑", "😒", "😋", "😌", "😓", "😔", "😍", "😕", "😜", "😝", "😖", "😗",
+        const starters = [5, 10, 15, 20, 25, 30, 35, 40];
+        const faces = ["👦", "👧", "👨", "👩", "👴", "👵", "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😎", "😇", "😏", "😐", "😉", "😊", "😑", "😒", "😋", "😌", "😓", "😔", "😍", "😕", "😜", "😝", "😖", "😗",
             "😞", "😟", "😘", "😙", "😠", "😡", "😚", "😛", "😢", "😪", "😣", "😤", "😫", "😥", "😬", "😦", "😭", "😧", "😮", "😯", "😩", "😨", "😲", "😳", "😴", "😵", "😶", "😷", "🙁", "🙂", "🙃", "🙄", "🤐",
             "🤑", "🤒", "🤓", "🤔", "🤤", "🤕", "🤥", "🤗", "🤠", "🤡", "🤧", "🤣", "🥸", "🤩", "😵‍💫", "🤫", "🤭", "🧐", "🤨", "😮‍💨", "😶‍🌫️"];
 
-        places = ["🏦", "🏨", "🏫", "🏠", "🏛️", "🏬", "🏭", "🏥", "🏣", "🏗️", "🏢", "🏘️"];
-
+        const places = ["🏦", "🏨", "🏫", "🏠", "🏛️", "🏬", "🏭", "🏥", "🏣", "🏗️", "🏢", "🏘️"];
+        const prices = [0, 0, .01, .01, .1, .1, 1, 1, 1, 10, 100];
 
         function pickone(items) {
             //get a random one of several things
             return items[Math.floor(Math.random() * items.length)];
         }
 
+        function Business(icon) {
+            this.face = icon;
+            this.coffers = 0;
+            this.caution = 0.25;
+            this.cost = pickone(prices);
+        }
+
         function Person() {
             this.face = pickone(faces);
-            this.times = [pickone(places), pickone(places), pickone(places), pickone(places)];
+            this.routine = [pickone(places), pickone(places), pickone(places), pickone(places)];
             this.caution = 0.5;
-            this.salary = 10;
+            this.salary = pickone(starters);
             this.wallet = pickone(starters);
         }
+
+        /*
+_ __ ___   _____   _____ 
+| '_ ` _ \ / _ \ \ / / _ \
+| | | | | | (_) \ V /  __/
+|_| |_| |_|\___/ \_/ \___|
+                          
+
+        */
         function move(who, to) {
             const whence = document.getElementById(who['face']);
             whence.remove();
             var where = document.getElementById(to);
             where.appendChild(whence);
-            /*
-            const elementToMove = document.querySelector(who);
-            const newParentElement = document.querySelector(to);
-            newParentElement.appendChild(elementToMove);*/
-
+            //todo: move some $$ from the wallet of 'who' into the coffers of 'to', here
+            //todo: and if they can't afford this business's cost, they sub in a random different business for this time in their routine
+            
         }
-        var times = ['🌅', '🏙️', '🌇', '🌃'];
+
+
+
+        var schedule = ['🌅', '🏙️', '🌇', '🌃'];
 
         var days = 0
         var now = 0
         people = []
+        businesses = {}
 
+        // initial people setup, places display/setup,and places display
         for (let step = 0; step < 15; step++) {
             people.push(new Person())
         }
@@ -100,10 +116,11 @@
             child.id = places[p];
             child.textContent = places[p];
             parent.appendChild(child);
+            businesses[p] = new Business(places[p]);
         }
 
         for (p in people) {
-            var parent = document.getElementById(people[p]['times'][0]);
+            var parent = document.getElementById(people[p]['routine'][0]);
             var child = document.createElement("div");
             child.id = people[p]['face'];
             child.textContent = people[p]['face'];
@@ -117,31 +134,29 @@
                 .innerHTML = "Phishing...";
 
             for (p in people) {
+                //TODO FIXME this is adding the same event listener for everyone???
                 document.getElementById(people[p]['face']).addEventListener('click', function () {
                     //tried to phish them
-                    console.log("you tried to phish " + people[p]['face']);
-                    if (Math.random() > people[p]['caution']) {
-                        //successfully phished
+                    console.log(p + " you tried to phish " + people[p]['face']);
+                    var roll = Math.random()
+                    if (roll > people[p]['caution']) {
+                        //successfully phished -- CHANGE THIS to add account to the compromised section
                         console.log("phishing successful!");
                         if (people[p]['wallet'] > 10) {
                             console.log("money acquired");
                             people[p]['wallet'] -= 10;
                             cash += 10;
                         }
+                        //business they're in gets .1 more cautious when a successful phish happens there
+                    }
+                    else {
+                        //person gets more cautious when a phish fails
+                        people[p]['caution'] += 0.1 * roll;
+                        //business they're in gets a teensy bit (.01) more cautious when it fails too?
                     }
                 })
             }
         })
-
-        function showTooltip() {
-            const tooltip = document.querySelector(".tooltip");
-            tooltip.style.display = "block";
-        }
-        function hideTooltip() {
-            const tooltip = document.querySelector(".tooltip");
-            tooltip.style.display = "none";
-        }
-
 
         //researching tool
         document.getElementById('research').addEventListener('click', function () {
@@ -157,16 +172,11 @@
                         //successfully researched them
                         console.log("researching successful!");
                         const whom = document.getElementById(people[p]['face']);
-                        /*
-                        <div id="myDiv">This is my div <span class="tooltip">This is my tooltip</span></div>
-                        const myDiv = document.getElementById("myDiv");
-                        myDiv.addEventListener("mouseover", showTooltip);
-                        myDiv.addEventListener("mouseout", hideTooltip);                      
-                        */
-                        whom.innerHTML = people[p]['face'] + "<span class='tooltip'>Day " + days + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 📅: " + people[p]['times'] + "</span>";
+                        //tooltip stuff is busted, make research do something else instead... show routine? 
+                        // whom.innerHTML = people[p]['face'] + "<span class='tooltip'>Day " + days + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 📅: " + people[p]['routine'] + "</span>";
 
-                        whom.addEventListener("mouseover", showTooltip);
-                        whom.addEventListener("mouseout", hideTooltip);
+                        //whom.addEventListener("mouseover", showTooltip);
+                        //whom.addEventListener("mouseout", hideTooltip);
                     }
                 })
             }
@@ -181,19 +191,28 @@
                 now = 0;
                 days += 1;
                 for (p in people) {
+                    //payday once per day
                     people[p]['wallet'] += people[p]['salary']
-
+                    //also drop their suspicion a bit, function of where they're located
+                    people[p]['caution'] -= .005 * people[p]['caution']
+                    //also change bank passwords if suspicion high enough (over 90?)
+                    //so remove accounts from account list
                 }
             }
-            time = times[now];
+            time = schedule[now];
             document.getElementById("clock")
                 .innerHTML = "day " + days + " " + time + "\t$" + cash;
 
             for (p in people) {
                 //console.log(people[p]);
-                move(people[p], people[p]['times'][now]);
+                move(people[p], people[p]['routine'][now]);
 
             }
+
+            //todo: here, go thru all businesses and if their suspicion is too high they hold a security training
+            // if their suspicion is low maybe they get some money from taking out a loan or something
+            //if their suspicion is high maybe they spend some money on security
+            // if they hold a security training, the business supsicion goes down, the individual suspicions go up, and people maybe replace the business in their routine
         }, 6000);
 
 
