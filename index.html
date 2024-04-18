@@ -91,7 +91,7 @@
         }
     </style>
     <div class="wrapper">
-
+        <div><em>False Economy</em> </div>
         <div id="clock">day 0</div>
         <div id="toggle">
             <div><a href="https://sharedsignals.guide/">SSF</a>
@@ -129,7 +129,10 @@
         </div>
 
     </div>
+    <div id="footer">
+        <small>made by edunham for the Okta Internal Hackathon in April 2024</small>
 
+    </div>
 
     <!-- -->
     <script>
@@ -142,7 +145,7 @@
             "🤑", "🤒", "🤓", "🤔", "🤤", "🤕", "🤥", "🤗", "🤠", "🤡", "🤧", "🤣", "🥸", "🤩", "😵‍💫", "🤫", "🤭", "🧐", "🤨", "😮‍💨", "😶‍🌫️"];
 
         const places = ["🏦", "🏨", "🏫", "🏠", "🏛️", "🏬", "🏭", "🏥", "🏣", "🏗️", "🏢", "🏘️"];
-        const prices = [0, 0, 1, 1, 1, 2, 3, 4, 6, 5, 1, 1, 10, 100];
+        const prices = [0, 0, 1, 1, 1, 2, 3, 4, 6, 5, 1, 1, 10];
 
         function pickone(items) {
             //get a random one of several things
@@ -194,7 +197,7 @@
                     loseBiz(to);
                 }
             }
-            
+
         }
 
 
@@ -406,7 +409,7 @@
         }
 
 
-       
+
 
         // phishing tool
         document.getElementById('phish').addEventListener('click', function () {
@@ -438,7 +441,10 @@
                         people[p]['caution'] = .99;
                     }
                     //payday once per day
-                    people[p]['wallet'] += people[p]['salary'];
+                    at = people[p]['routine'][now];
+                    pay = businesses[at]['cost'] * 4;
+                    businesses[at]['coffers'] -= pay;
+                    people[p]['wallet'] += pay;
                     //also drop their suspicion a bit, function of where they're located
                     people[p]['caution'] -= 0.05 * people[p]['caution'];
                     //rotate passwords
@@ -449,7 +455,7 @@
                     }
                 }
                 for (b in businesses) {
-                    if (businesses[b]['caution'] > 1){
+                    if (businesses[b]['caution'] > 1) {
                         businesses[b]['caution'] = 1;
                     }
                     if (businesses[b]['caution'] > 0.85) {
