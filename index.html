@@ -22,7 +22,7 @@
 
         .wrapper .wrapper>div {
             background: lightgray;
-            color: blue;
+            color: black;
             flex-direction: row;
 
         }
@@ -211,17 +211,19 @@
         for (let step = 0; step < 15; step++) {
             people.push(new Person())
         }
-        for (p in places) {
+        for (let b of places) { //thanks claude for the obscure syntax
+            console.log(b)
             var parent = document.getElementById("places");
             var child = document.createElement("div");
             var nest = document.createElement("div");
-            child.id = places[p];
-            nest.textContent = places[p];
+            child.id = b;
+            nest.textContent = b;
             child.appendChild(nest);
             parent.appendChild(child);
-            businesses[places[p]] = new Business(places[p]);
-            b = places[p]
+            businesses[b] = new Business(b);
             nest.addEventListener('click', function (e) {
+                console.log(b + " got clicked")
+                console.log(businesses[b])
                 var roll = Math.random();
                 if (action == "phish") {
                     if (roll < businesses[b]['caution']) {
@@ -239,20 +241,58 @@
 
 
         }
-        for (let p in Object.keys(people)) {
-            //for (p in people) {
+        for (let p of Object.keys(people)) {
             var parent = document.getElementById(people[p]['routine'][0]);
             var child = document.createElement("div");
             child.id = people[p]['face'];
             child.textContent = people[p]['face'];
             parent.appendChild(child)
             ///this is where the eventlistener should get added probably
-        };
+
+            child.addEventListener('click', function (e) {
+                console.log("saw click on " + people[p]['face'])
+                var roll = Math.random();
+                if (action == "phish") {
+                    if (roll > people[p]['caution']) {
+                        //successful phish
+                        happen("🎣" + people[p]['face'])
+                        compromised.unshift(p)
+                        businesses[people[p]['routine'][now]]['caution'] += .25 * people[p]['salary']
+                        updateAccounts()
+
+
+                        //business they're in gets .1 more cautious when a successful phish happens there
+                    }
+                    else {
+                        //person gets more cautious when a phish fails
+                        people[p]['caution'] += 0.1 * roll;
+                        happen(people[p]['face'] + "🚫🎣")
+                        //business they're in gets a teensy bit (.01) more cautious when it fails too?
+
+                        //also update the wallet
+
+                    }
+                    document.getElementById("wallet")
+                        .innerHTML = "$" + cash;
+                }
+                if (action == "research") {
+
+                    if (roll > people[p]['caution']) {
+                        happen("🔎 " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔒:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine']);
+                    }
+                    else {
+                        happen(people[p]['face'] + " is careful of their privacy online!");
+                    }
+
+
+                }
+            })
+        }
 
         function happen(what) {
             const events = document.getElementById("events");
             var child = document.createElement("div");
-            child.id = days + schedule[now].charCodeAt(0) + people[p]['face'].charCodeAt(0); // unique-enough event...
+            child.id = days + schedule[now].charCodeAt(0); // unique-enough event...
             const stamp = "day " + days + ": ";
             child.textContent = stamp + what;
             if (events.firstChild) {
@@ -278,8 +318,9 @@
             accounts.innerHTML = "";
             const bizaccts = document.getElementById("bizaccts");
             bizaccts.innerHTML = "";
-            for (let s of Object.keys(bizcomp)) {
-                a = bizcomp[s];
+            for (let a of bizcomp) {
+                console.log(a)
+                //a = bizcomp[s];
                 //re-add business accounts
                 var child = document.createElement("div");
                 i = a.charCodeAt(0);
@@ -291,7 +332,6 @@
                 escalate.id = "escalate" + i;
                 escalate.textContent = "🔑👥 Escalate";
                 empty.addEventListener('click', function (e) {
-                    //clicked to take their money
                     take = businesses[a]['coffers'];
                     businesses[a]['coffers'] = 0;
                     cash += take
@@ -314,7 +354,8 @@
                 }
 
             }
-            for (let a of Object.keys(compromised)) {
+            for (let q of Object.keys(compromised)) {
+                a = compromised[q];
                 //re-add personal accounts one by one
                 var child = document.createElement("div");
                 i = people[a]['face'].charCodeAt(0);
@@ -365,48 +406,7 @@
         }
 
 
-        /**
-         * ALL PEOPLE RESPONSES TO GETTING CLICKED GO HERE
-         */
-        for (let p of Object.keys(people)) {
-            // this "let p of Object.keys" thing came from Claude when we had a chat about js internals
-            document.getElementById(people[p]['face']).addEventListener('click', function (e) {
-                var roll = Math.random();
-                if (action == "phish") {
-                    if (roll > people[p]['caution']) {
-                        //successful phish
-                        happen("🎣" + people[p]['face'])
-                        compromised.unshift(p)
-                        updateAccounts()
-                        businesses[people[p]['routine'][now]]['caution'] += .25 * people[p]['salary']
-
-                        //business they're in gets .1 more cautious when a successful phish happens there
-                    }
-                    else {
-                        //person gets more cautious when a phish fails
-                        people[p]['caution'] += 0.1 * roll;
-                        happen(people[p]['face'] + "🚫🎣")
-                        //business they're in gets a teensy bit (.01) more cautious when it fails too?
-
-                        //also update the wallet
-
-                    }
-                    document.getElementById("wallet")
-                        .innerHTML = "$" + cash;
-                }
-                if (action == "research") {
-
-                    if (roll > people[p]['caution']) {
-                        happen("🔎 " + people[p]['face'] + ": 💰$" + people[p]['wallet'] + ", 💼$" + people[p]['salary'] + ", 🔒:" + Math.floor(people[p]['caution'] * 100) + ", 📅: " + people[p]['routine']);
-                    }
-                    else {
-                        happen(people[p]['face'] + " is careful of their privacy online!");
-                    }
-
-
-                }
-            })
-        }
+       
 
         // phishing tool
         document.getElementById('phish').addEventListener('click', function () {
