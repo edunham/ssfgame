@@ -1,113 +1,127 @@
 <head>
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
- <!-- Make sure you put this AFTER Leaflet's CSS -->
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+
 </head>
 
 <body>
+    <style>
+        .wrapper {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .wrapper>div {
+            font-size: 4vh;
+            color: white;
+            background: lightslategrey;
+            margin: .1em;
+            padding: .3em;
+            border-radius: 3px;
+            flex: 1;
+            flex-direction: row;
+        }
+
+        .wrapper .wrapper>div {
+            background: lightgray;
+            color: blue;
+            flex-direction: row;
+
+        }
+    </style>
+    <div class="wrapper">
+
+        <div id="clock"></div>
+    </div>
+    <div class="wrapper">
+        <div>Tools
+            <div class="wrapper" id="tools">
+                <div>1</div>
+                <div>2</div>
+                <div>3</div>
+            </div>
+        </div>
+        <div>Places
+            <div class="wrapper" id="places">
+            </div>
+        </div>
+    </div>
+
     <div id="clock"></div>
+    <!-- -->
+    <script>
+        faces = ["👦", "👧", "👨", "👩", "👴", "👵", "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😎", "😇", "😏", "😐", "😉", "😊", "😑", "😒", "😋", "😌", "😓", "😔", "😍", "😕", "😜", "😝", "😖", "😗",
+            "😞", "😟", "😘", "😙", "😠", "😡", "😚", "😛", "😢", "😪", "😣", "😤", "😫", "😥", "😬", "😦", "😭", "😧", "😮", "😯", "😩", "😨", "😲", "😳", "😴", "😵", "😶", "😷", "🙁", "🙂", "🙃", "🙄", "🤐",
+            "🤑", "🤒", "🤓", "🤔", "🤤", "🤕", "🤥", "🤗", "🤠", "🤡", "🤧", "🤣", "🥸", "🤩", "😵‍💫", "🤫", "🤭", "🧐", "🤨", "😮‍💨", "😶‍🌫️"];
 
-    <div id="map"  style="height: 50%;"></div>
-<script>
-var map = L.map('map').setView([51.505, -0.09], 13);
-
-
-
-function Business(name){
-this.name = name;
-this.face = "💼";
-this.employees = [];
-this.location = [51.509, -0.08];
-}
-
-faces = ["🧑‍🦰", "👱", "🧑‍🦳", "🧑‍🦱"];
-
-function r(i){
-    // add a little randomness to an integer but not too much
-  return  i + Math.floor(Math.random() * .001) - Math.floor(Math.random() * .001);
-}
-
-function pickone(items){
-    //get a random one of several things
-    return items[Math.floor(Math.random()*items.length)];
-}
-
-function Person(name) {
-this.name = name;
-this.face =  pickone(faces);
-// const pin = L.marker(latLng, L.divIcon({ html: emojiImg }));
-// var marker = L.marker([51.5, -0.09]).addTo(map);
-this.times = [[r(51.5), r(-0.09)], [r(51.509), r(-0.08)], [r(51.51), r(-0.047)], [r(51.508), r(-0.11)]];
-this.caution = 50;
-this.wallet = 0;
-}
+        places = ["🏦", "🏨", "🏫", "🏠", "🏛️", "🏬", "🏭", "🏥", "🏣", "🏗️", "🏢", "🏘️"];
 
 
-var clocks =['🕛🕧🕐🕜🕑🕝🕒🕞🕓🕟🕔🕠🕕🕡🕖🕢🕗🕣🕘🕤🕙🕥🕚🕦'];
-var times = ['🌅', '🏙️', '🌇','🌃' ];
+        function pickone(items) {
+            //get a random one of several things
+            return items[Math.floor(Math.random() * items.length)];
+        }
 
-var days = 0
-var now = 0
-people = [new Person("Bob"), new Person("Alex"), new Person("Jess")]
+        function Person() {
+            this.face = pickone(faces);
+            this.times = [pickone(places), pickone(places), pickone(places), pickone(places)];
+            this.caution = 50;
+            this.wallet = 0;
+        }
+        function move(who, to){
+            const whence = document.getElementById(who);
+            whence.remove();
+            var where = document.getElementById(to);
+            where.appendChild(whence);
+            /*
+            const elementToMove = document.querySelector(who);
+            const newParentElement = document.querySelector(to);
+            newParentElement.appendChild(elementToMove);*/
 
-//setup layers when this script first runs
-layers = {}
-for (p in people){
-layers[people[p]['name']] = L.marker(people[p]['times'][0]).bindPopup(people[p]['face']);
-}
-var personlayers = L.layerGroup(layers);
-var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-});
+        }
+        var times = ['🌅', '🏙️', '🌇', '🌃'];
+
+        var days = 0
+        var now = 0
+        people = []
+
+        for (let step = 0; step < 15; step++) {
+            people.push(new Person())
+        }
+        for (p in places) {
+            var parent = document.getElementById("places");
+            var child = document.createElement("div");
+            child.id = places[p];
+            child.textContent = places[p];
+            parent.appendChild(child);
+        }
+
+        for (p in people) {
+            var parent = document.getElementById(people[p]['times'][0]);
+            var child = document.createElement("div");
+            child.id = people[p]['face'];
+            child.textContent = people[p]['face'];
+            parent.appendChild(child)
+        };
 
 
-var baseMaps = {
-    "The World": osm,
-};
-
-var overlayMaps = {
-    "People": personlayers
-};
-console.log(personlayers);
-var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-
-
-//timer and all that happens on it
-setInterval(function() {
-  now += 1;
-  if ( now > 3){ 
-    now = 0;
-    days += 1;
-    }
-  time = times[now];
-  document.getElementById("clock")
+        //timer and all that happens on it
+        setInterval(function () {
+            now += 1;
+            if (now > 3) {
+                now = 0;
+                days += 1;
+            }
+            time = times[now];
+            document.getElementById("clock")
                 .innerHTML = "day " + days + " " + time;
 
-  for (p in people){
-    console.log(people[p]);
-    /*
-    L.popup()
-    .setLatLng(people[p]['times'][now])
-    .setContent(people[p]['face'])
-    .openOn(map);
-    */
+            for (p in people) {
+                console.log(people[p]);
+                move(people[p]['face'], people[p]['times'][now]);
 
-    /*
-    var marker = new L.marker(people[p]['times'][now], { opacity: 0.1 }); //opacity may be set to zero
-marker.bindTooltip(people[p]['face'], {permanent: false, className: "my-label", offset: [0, 0] });
-marker.addTo(map);*/
-    }
-}, 2000);
+            }
+        }, 2000);
 
 
-</script>
-
-<a href="https://leafletjs.com/examples/quick-start/">leaflet docs</a>
+    </script>
 
 </body>
