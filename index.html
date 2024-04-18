@@ -312,6 +312,7 @@
             compromised.splice(compromised.indexOf(a), 1);
         }
         function loseBiz(a) {
+            businesses[a]['caution'] = 0.1;
             bizcomp.splice(bizcomp.indexOf(a), 1);
         }
 
@@ -463,6 +464,7 @@
                     if (businesses[b]['caution'] > 1) {
                         businesses[b]['caution'] = 1;
                     }
+                    businesses[b]['caution'] -= 0.1;
                     if (businesses[b]['caution'] > 0.85) {
                         loseBiz(b);
                         happen(businesses[b]['face'] + "💻🔒 ****** ");
